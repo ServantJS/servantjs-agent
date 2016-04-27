@@ -1,0 +1,20 @@
+{
+  "url": "ws://127.0.0.1:8010",
+  "autoReconnect": true,
+  "reconnectInterval": 5,
+
+  "middlewares": [
+
+  ],
+
+  "modules": [
+    {
+      "name": "security",
+      "keyFilePath": "./file.key"
+    },
+    {
+      "name": "haproxy",
+      "configPath": "./haproxy.conf"
+    }
+  ]
+}

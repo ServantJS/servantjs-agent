@@ -1,0 +1,19 @@
+{
+  "name": "agent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "async": "^1.5.2",
+    "nconf": "^0.8.4",
+    "vow": "^0.4.12",
+    "winston": "^2.2.0",
+    "ws": "^1.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "VO",
+  "license": "ISC"
+}
