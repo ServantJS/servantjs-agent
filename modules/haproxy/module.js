@@ -119,8 +119,8 @@ class HAProxyModule extends WorkerModuleBase {
                     ];
                 } else {
                     seq = [
-                        {func: trans.removeFile, args: [oldFile]},
-                        {func: trans.exec, args: [`service haproxy stop`, true]}
+                        {func: trans.exec, args: [`service haproxy stop`, true]},
+                        {func: trans.writeFile, args: [this.configPath, '']}
                     ];
                 }
 
@@ -158,6 +158,11 @@ class HAProxyModule extends WorkerModuleBase {
                 });
             }
         ], (errorText, report) => {
+            if (errorText && typeof errorText !== 'string') {
+                errorText = errorText.message;
+                report = ['Read file - Error'];
+            }
+
             this.worker.sendMessage(this.createMessage(event, errorText,
                 {taskKey: message.data.taskKey, report: report})
             );
