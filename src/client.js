@@ -142,6 +142,14 @@ class ServantWorker extends MiddlewareStack {
         this.modulesOptions.forEach((item) => {
             const temp = require(path.join(path.dirname(module.parent.filename), 'modules', item.name))(this, item);
 
+            if (item.hasOwnProperty('depends')) {
+                item.depends.middlewares.forEach((mw) => {
+                    if (this.middlewaresOptions.indexOf(mw) < 0) {
+                        throw new Error(`Module "${item.name} requires "${mw}" middleware.`);
+                    }
+                });
+            }
+
             if (temp.hasOwnProperty('middlewares')) {
                 if (!Array.isArray(temp.middlewares)) {
                     throw new Error('"middlewares" property must be an array');
