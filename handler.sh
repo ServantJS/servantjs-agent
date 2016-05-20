@@ -13,6 +13,10 @@ function stop {
     forever stop ${START_SCRIPT}
 }
 
+function status {
+    forever list | grep "pid\|${START_SCRIPT}"
+}
+
 case "$1" in
   start)
     start
@@ -24,8 +28,11 @@ case "$1" in
     stop
     start
     ;;
+  status)
+    status
+    ;;
   *)
-    echo "Usage: servant-agent <start|stop|restart>"
+    echo "Usage: servant-agent <start|stop|restart|status>"
     exit 1
     ;;
 
