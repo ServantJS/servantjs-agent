@@ -9,6 +9,7 @@ module.exports = (worker, options) => {
     logger.info(`Init "${module.name.toUpperCase()}" module. Version - ${module.version}`);
 
     return {
-        module: module
+        module: module,
+        middlewares: require('./middlewares')()
     };
 };
