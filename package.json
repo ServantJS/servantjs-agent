@@ -1,7 +1,7 @@
 {
-  "name": "agent",
+  "name": "servantjs-agent",
   "version": "1.0.0",
-  "description": "",
+  "description": "**ServantJS Agent** - клиентское приложение для ServantJS сервера, главной задачей которой является прием и обработка поступающих заданий от сервера. После выполнения каждого задания, клиент отправляет отчет на сервер о выполненных командах и статусе задания.",
   "main": "app.js",
   "dependencies": {
     "async": "^1.5.2",
@@ -12,8 +12,22 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "node-gyp rebuild"
   },
   "author": "VO",
-  "license": "ISC"
+  "license": "Apache-2.0",
+  "gypfile": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ServantJS/servantjs-agent.git"
+  },
+  "keywords": [
+    "servant",
+    "agent"
+  ],
+  "bugs": {
+    "url": "https://github.com/ServantJS/servantjs-agent/issues"
+  },
+  "homepage": "https://github.com/ServantJS/servantjs-agent#readme"
 }
