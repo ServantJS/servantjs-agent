@@ -10,11 +10,26 @@
   "modules": [
     {
       "name": "security",
-      "keyFilePath": "./file.key"
+      "keyFilePath": "../servantjs/file.key",
+      "depends": {
+        "middlewares": [],
+        "modules": []
+      }
     },
     {
       "name": "haproxy",
-      "configPath": "./haproxy.conf"
+      "configPath": "./tmp/haproxy.conf",
+      "depends": {
+        "middlewares": [],
+        "modules": []
+      }
+    },
+    {
+      "name": "monitoring",
+      "depends": {
+        "middlewares": [],
+        "modules": []
+      }
     }
   ]
 }
