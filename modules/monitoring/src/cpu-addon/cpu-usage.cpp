@@ -61,7 +61,7 @@ namespace CPUUsage {
         } else {
             Local<Array> cpus = Array::New(isolate, (int)work->cpu->ticksList.size());
 
-            for (int i = 0; i < work->cpu->ticksList.size(); i++) {
+            for (size_t i = 0; i < work->cpu->ticksList.size(); i++) {
                 float total = Ticks::getTotal(work->cpu->ticksList[i], work->cpu->prevTicksList[i]);
                 float user = Ticks::getUser(work->cpu->ticksList[i], work->cpu->prevTicksList[i]);
                 float system = Ticks::getSystem(work->cpu->ticksList[i], work->cpu->prevTicksList[i]);

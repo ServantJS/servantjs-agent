@@ -1,5 +1,8 @@
 #include "CPUInfo.hpp"
 
+#ifdef __linux__
+#include <fstream>
+#endif
 #ifdef __APPLE__
 #include <mach/mach_host.h>
 #include <mach/processor_info.h>
@@ -17,7 +20,7 @@ int CPUInfo::update() {
         return rc;
     }
 
-    for (int i = 0; i < cpu_count; i++) {
+    for (unsigned int i = 0; i < cpu_count; i++) {
         Ticks *ticks = new Ticks(
             cpu_load[i].cpu_ticks[CPU_STATE_USER],
             cpu_load[i].cpu_ticks[CPU_STATE_NICE],

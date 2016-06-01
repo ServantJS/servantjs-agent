@@ -1,11 +1,3 @@
-//
-//  CPUInfo.hpp
-//  cpu-usage
-//
-//  Created by Vitaliy Orlov on 31.05.16.
-//  Copyright © 2016 Vitaliy Orlov. All rights reserved.
-//
-
 #ifndef CPUInfo_hpp
 #define CPUInfo_hpp
 
@@ -31,8 +23,6 @@ struct Ticks {
         this->idletime = idletime;
     }
 
-    ~Ticks() {}
-
     inline unsigned long long int used() {
         return usertime + nicetime + systemtime;
     }
@@ -55,9 +45,11 @@ struct Ticks {
 };
 
 template <typename T>
-void delete_pointed_to(T* const ptr)
+void deep_clear(vector<T> v)
 {
-    delete ptr;
+    for (size_t i = 0; i < v.size(); i++) {
+        delete v[i];
+    }
 }
 
 class CPUInfo {
@@ -67,9 +59,8 @@ public:
     CPUInfo() {}
 
     ~CPUInfo() {
-        printf("free\n");
-        for_each(ticksList.begin(), ticksList.end(), delete_pointed_to<Ticks>);
-        for_each(prevTicksList.begin(), prevTicksList.end(), delete_pointed_to<Ticks>);
+        deep_clear<Ticks *>(ticksList);
+        deep_clear<Ticks *>(prevTicksList);
     }
 
     int load() {
@@ -88,7 +79,7 @@ public:
     int get_usage() {
         if (ticksList.size()) {
             if (prevTicksList.size()) {
-                for_each(prevTicksList.begin(), prevTicksList.end(), delete_pointed_to<Ticks>);
+                deep_clear<Ticks *>(prevTicksList);
                 prevTicksList.clear();
             }
 
