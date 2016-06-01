@@ -67,10 +67,10 @@ namespace CPUUsage {
                 float system = Ticks::getSystem(work->cpu->ticksList[i], work->cpu->prevTicksList[i]);
 
                 Local<Object> result = Object::New(isolate);
-                result->Set(String::NewFromUtf8(isolate, "index"), Number::New(isolate, i));
+                result->Set(String::NewFromUtf8(isolate, "name"), Number::New(isolate, i));
                 result->Set(String::NewFromUtf8(isolate, "total"), Number::New(isolate, total));
                 result->Set(String::NewFromUtf8(isolate, "user"), Number::New(isolate, user));
-                result->Set(String::NewFromUtf8(isolate, "sys"), Number::New(isolate, system));
+                result->Set(String::NewFromUtf8(isolate, "system"), Number::New(isolate, system));
 
                 cpus->Set(i, result);
             }
