@@ -46,13 +46,19 @@ git clone ${GIT_PATH}
 
 mv ${GIT_NAME} ${NAME}
 
-cd ./${NAME}
-npm install
-
 if ! which forever > /dev/null; then
     echo "Forever did not install. Start installing..."
     npm i -g forever
 fi
+
+if ! which node-gyp > /dev/null; then
+    echo "Node-gyp did not install. Start installing..."
+    npm i -g node-gyp
+fi
+
+cd ./${NAME}
+# --unsafe-perm need for exec cmd:node-gyp configure build in package.json
+npm install --unsafe-perm
 
 chmod 777 ${INSTALL_DIR}/${NAME}/handler.sh
 ln -s ${INSTALL_DIR}/${NAME}/handler.sh /usr/local/bin/servant-agent
