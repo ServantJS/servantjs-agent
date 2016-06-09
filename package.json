@@ -11,9 +11,7 @@
     "ws": "^1.1.0"
   },
   "devDependencies": {},
-  "scripts": {
-    "install": "node-gyp configure build"
-  },
+
   "author": "VO",
   "license": "Apache-2.0",
   "gypfile": true,
