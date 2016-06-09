@@ -35,11 +35,16 @@ exports.get = (cb) => {
 
     const netInfoCallback = (name, version, kernel, cb) => {
         const p = os.platform() === 'darwin' ? 6 : 8;
-        exec(`﻿netstat -nr | grep \'^default\\|^0.0.0.0\' | awk \'{print $${p}}\'`, (err, stdout, stderr) => {
+        //exec(`netstat -nr | grep \'default\\|^0.0.0.0\' | awk \'{print $${p}}\'`,
+        //exec(`﻿netstat -nr | grep \'^default\\|^0.0.0.0\' | awk \'{print $${p}}\'`
+        exec(`netstat -nr | grep \'default\\|^0.0.0.0\' | awk \'{print $${p}}\'`, (err, stdout, stderr) => {
             if (err) {
                 cb(err);
             } else {
                 const mainInterface = stdout.trim();
+
+                console.log(stdout, stderr);
+
                 const temp = os.networkInterfaces()[mainInterface];
                 cb(null, name, version, kernel, {name: mainInterface, ip: temp});
             }
