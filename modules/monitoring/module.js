@@ -8,7 +8,11 @@ const ServantMessage = require('../message').ServantMessage;
 
 const logger = require('../core').logger;
 
-const cpu = require('../../build/Release/cpuaddon.node');
+//const cpu = require('../../build/Release/cpuaddon.node');
+
+const cpuMetric = require('./metrics/cpu-metric');
+const ramMetric = require('./metrics/ram-metric');
+const nodeMetric = require('./metrics/node-details-metric');
 
 const MODULE_NAME = 'monitoring';
 const MODULE_VERSION = '1.0';
@@ -55,17 +59,28 @@ class MonitoringModule extends WorkerModuleBase {
     _onCollect(message) {
         switch (message.data.metric) {
             case 'os_cpu':
-                cpu.usage((err, result) => {
-                    let temp = null;
+                cpuMetric.usagePerSecond((res) => {
+                    this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, null,
+                        {id: message.data.id, metric: message.data.metric, value: res})
+                    );
+                });
 
+                break;
+            case 'os_ram':
+                this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, null,
+                    {id: message.data.id, metric: message.data.metric, value: ramMetric.usage()})
+                );
+                break;
+            case 'node_details':
+                nodeMetric.get((err, res) => {
                     if (err) {
-                        temp  = `${err.msg} Code: ${err.code}.`;
-                        logger.error(temp);
+                        logger.error(err.message);
+                        logger.verbose(err.stack);
                     }
 
-                    this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, temp,
-                        {metric: message.data.metric, value: result})
-                    );    
+                    this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, err ? err.message : null,
+                        {id: message.data.id, metric: message.data.metric, value: res})
+                    );
                 });
 
                 break;
