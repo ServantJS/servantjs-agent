@@ -36,8 +36,8 @@ exports.get = (cb) => {
     const netInfoCallback = (name, version, kernel, cb) => {
         const p = os.platform() === 'darwin' ? 6 : 8;
         exec(`netstat -nr | grep \'^default\\|^0.0.0.0\' | awk \'{print $${p}}\'`, (err, stdout, stderr) => {
-            if (err) {
-                cb(err);
+            if (err || stderr) {
+                cb(err || new Error(stderr));
             } else {
                 const mainInterface = stdout.trim();
                 const temp = os.networkInterfaces()[mainInterface];
