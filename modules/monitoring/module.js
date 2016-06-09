@@ -8,11 +8,10 @@ const ServantMessage = require('../message').ServantMessage;
 
 const logger = require('../core').logger;
 
-//const cpu = require('../../build/Release/cpuaddon.node');
-
 const cpuMetric = require('./metrics/cpu-metric');
 const ramMetric = require('./metrics/ram-metric');
 const nodeMetric = require('./metrics/node-details-metric');
+const netActivityMetric = require('./metrics/net-activity-metric');
 
 const MODULE_NAME = 'monitoring';
 const MODULE_VERSION = '1.0';
@@ -70,6 +69,18 @@ class MonitoringModule extends WorkerModuleBase {
                 this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, null,
                     {id: message.data.id, metric: message.data.metric, value: ramMetric.usage()})
                 );
+                break;
+            case 'os_net_a':
+                netActivityMetric.get((err, res) => {
+                    if (err) {
+                        logger.error(err.message);
+                        logger.verbose(err.stack);
+                    }
+
+                    this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, err ? err.message : null,
+                        {id: message.data.id, metric: message.data.metric, value: res})
+                    );
+                });
                 break;
             case 'node_details':
                 nodeMetric.get((err, res) => {

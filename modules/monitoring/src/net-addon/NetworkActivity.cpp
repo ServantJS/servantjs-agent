@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <string.h>
 
 #ifdef __APPLE__
     #include <sys/sysctl.h>
@@ -38,13 +39,11 @@ int load_interfaces(std::vector<NetworkInterface *> &list) {
 
     size_t len;
     if (sysctl(mib, 6, NULL, &len, NULL, 0) < 0) {
-        //fprintf(stderr, "sysctl: %s\n", strerror(errno));
         return 1;
     }
 
     buf = (char *)malloc(len);
     if (sysctl(mib, 6, buf, &len, NULL, 0) < 0) {
-        //fprintf(stderr, "sysctl: %s\n", strerror(errno));
         return 1;
     }
 
@@ -114,14 +113,14 @@ int load_interfaces(std::vector<NetworkInterface *> &list) {
         family = ifa->ifa_addr->sa_family;
 
         NetworkInterface *ni = new NetworkInterface();
-        size_t len = strlen(ifa->if_name);
+        size_t len = strlen(ifa->ifa_name);
         ni->name = (char *)calloc(len + 1, sizeof(char));
 
         if (ni->name == NULL) {
             return 1;
         }
 
-        strncpy(ni->name, ifa->if_name, len);
+        strncpy(ni->name, ifa->ifa_name, len);
 
         ni->index = n + 1;
 

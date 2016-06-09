@@ -1,6 +1,8 @@
 #include <node.h>
 #include <uv.h>
 
+#include <string.h>
+
 #include "NetworkActivity.hpp"
 
 namespace NetActivity {
