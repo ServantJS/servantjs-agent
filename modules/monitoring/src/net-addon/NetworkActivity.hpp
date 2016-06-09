@@ -1,11 +1,3 @@
-//
-//  NetworkActivity.hpp
-//  cpu-usage
-//
-//  Created by Vitaliy Orlov on 09.06.16.
-//  Copyright © 2016 Vitaliy Orlov. All rights reserved.
-//
-
 #ifndef NetworkActivity_hpp
 #define NetworkActivity_hpp
 

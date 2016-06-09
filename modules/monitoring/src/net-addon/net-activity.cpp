@@ -1,11 +1,3 @@
-//
-//  net-activity.cpp
-//  cpu-usage
-//
-//  Created by Vitaliy Orlov on 09.06.16.
-//  Copyright © 2016 Vitaliy Orlov. All rights reserved.
-//
-
 #include <node.h>
 #include <uv.h>
 
