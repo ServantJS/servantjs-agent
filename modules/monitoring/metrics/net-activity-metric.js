@@ -1,6 +1,7 @@
 'use strict';
 
 const async = require('async');
+const os = require('os');
 const net = require('../../../build/Release/netaddon.node');
 
 exports.get = (cb) => {
@@ -21,12 +22,22 @@ exports.get = (cb) => {
             previous.sort((a, b) => a.index - b.index);
             current.sort((a, b) => a.index - b.index);
 
+            const inets = os.networkInterfaces();
+            const result = {};
             let i = 0;
             async.whilst(
                 () => i < current.length,
                 (next) => {
                     try {
-                        current[i].perSecond = {
+                        const iName = current[i].name;
+                        if (inets.hasOwnProperty(iName) || iName === 'total') {
+                            result[iName] = current[i];
+                        } else {
+                            ++i;
+                            return next();
+                        }
+
+                        result[iName].per_sec = {
                             packets: {
                                 input: current[i].packets.input - previous[i].packets.input,
                                 output: current[i].packets.output - previous[i].packets.output
@@ -37,6 +48,9 @@ exports.get = (cb) => {
                             }
                         };
 
+                        delete result[iName].name;
+                        delete result[iName].index;
+
                         ++i;
                         next();
                     } catch (e) {
@@ -44,7 +58,7 @@ exports.get = (cb) => {
                     }
                 },
                 (err) => {
-                    cb(err, current);
+                    cb(err, result);
                 }
             );
         }
