@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-START_SCRIPT="servantjs-agent.js"
-
 SERVANT_DIR="/usr/local/servantjs"
-INSTALL_DIR="${SERVANT_DIR}/agent"
-GIT_NAME="${SERVANT_DIR}/servantjs-agent"
-LINK_PATH="/usr/local/bin/servant-agent"
-BACKUP_DIR="${SERVANT_DIR}/.agent_backup"
-INSTALL_BACKUP_FILE="${SERVANT_DIR}/.agent_install.sh"
+NAME="agent"
+START_SCRIPT="servantjs-${NAME}.js"
+INSTALL_DIR="${SERVANT_DIR}/${NAME}"
+GIT_NAME="${SERVANT_DIR}/servantjs-${NAME}"
+LINK_PATH="/usr/local/bin/servant-${NAME}"
+BACKUP_DIR="${SERVANT_DIR}/.${NAME}_backup"
+INSTALL_BACKUP_FILE="${SERVANT_DIR}/.${NAME}_install.sh"
 
 function start {
     cd ${INSTALL_DIR}
@@ -65,7 +65,7 @@ case "$1" in
     update
     ;;
   *)
-    echo "Usage: servant-agent <start|stop|restart|status>"
+    echo "Usage: servant-${NAME} <start|stop|restart|status|update>"
     exit 1
     ;;
 
