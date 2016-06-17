@@ -29,6 +29,9 @@
       "depends": {
         "middlewares": [],
         "modules": []
+      },
+      "haproxy": {
+        "statUnixSocket": "/tmp/haproxy.stats"
       }
     }
   ]

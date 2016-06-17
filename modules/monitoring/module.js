@@ -13,6 +13,8 @@ const ramMetric = require('./metrics/ram-metric');
 const nodeMetric = require('./metrics/node-details-metric');
 const netActivityMetric = require('./metrics/net-activity-metric');
 
+const haproxyMetric = require('./metrics/haproxy-metric');
+
 const MODULE_NAME = 'monitoring';
 const MODULE_VERSION = '1.0';
 
@@ -94,6 +96,18 @@ class MonitoringModule extends WorkerModuleBase {
                     );
                 });
 
+                break;
+            case 'hp_stat':
+                haproxyMetric.get({statUnixSocket: this._options.haproxy.statUnixSocket}, (err, res) => {
+                    if (err) {
+                        logger.error(err.message);
+                        logger.verbose(err.stack);
+                    }
+
+                    this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, err ? err.message : null,
+                        {id: message.data.id, metric: message.data.metric, value: res})
+                    );
+                });
                 break;
             default:
                 break;
