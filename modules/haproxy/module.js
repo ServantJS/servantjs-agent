@@ -113,13 +113,13 @@ class HAProxyModule extends WorkerModuleBase {
                     seq = [
                         {func: trans.writeFile, args: [oldFile, content]},
                         {func: trans.writeFile, args: [this.configPath, message.data.config]},
-                        {func: trans.exec, args: [`haproxy -c -f "${this.configPath}"`, false]},
+                        {func: trans.exec, args: [`haproxy -c -f "${this.configPath}"`]},
                         {func: trans.removeFile, args: [oldFile]},
-                        {func: trans.exec, args: [`service haproxy reload`, true]}
+                        {func: trans.exec, args: [`service haproxy reload`]}
                     ];
                 } else {
                     seq = [
-                        {func: trans.exec, args: [`service haproxy stop`, true]},
+                        {func: trans.exec, args: [`service haproxy stop`]},
                         {func: trans.writeFile, args: [this.configPath, '']}
                     ];
                 }
@@ -144,7 +144,7 @@ class HAProxyModule extends WorkerModuleBase {
 
                 trans.funcLoop([
                     {func: trans.writeFile, args: [this.configPath, content]},
-                    {func: trans.exec, args: [`service haproxy reload`, true]},
+                    {func: trans.exec, args: [`service haproxy reload`]},
                     {func: trans.removeFile, args: [oldFile]}
                 ], true, (err, _report) => {
                     if (err) {
