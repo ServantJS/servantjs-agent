@@ -10,7 +10,7 @@
   "modules": [
     {
       "name": "security",
-      "keyFilePath": "../servantjs/file.key",
+      "accessKey": "123",
       "depends": {
         "middlewares": [],
         "modules": []
@@ -32,6 +32,14 @@
       },
       "haproxy": {
         "statUnixSocket": "/tmp/haproxy.stats"
+      }
+    },
+    {
+      "name": "nginx",
+      "linkPath": "./tmp/nginx/links",
+      "depends": {
+        "middlewares": [],
+        "modules": []
       }
     }
   ]
