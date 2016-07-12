@@ -20,7 +20,16 @@ class SecurityModule extends WorkerModuleBase {
     constructor(worker, options) {
         super(worker);
 
-        this._keyFile = fs.readFileSync(options.keyFilePath).toString();
+        if (!(options.keyFilePath || options.accessKey)) {
+            throw new Error('Missing access key options.');
+        }
+
+        if (options.keyFilePath) {
+            this._secureKey = fs.readFileSync(options.keyFilePath).toString();
+        } else {
+            this._secureKey = options.accessKey;
+        }
+        
         this._token = null;
         this._options = options;
     }
@@ -52,6 +61,13 @@ class SecurityModule extends WorkerModuleBase {
     }
 
     /**
+     * @return {string}
+     */
+    static get ErrorEventName() {
+        return 'Error';
+    }
+
+    /**
      *
      * @param {ServantMessage} message
      */
@@ -64,6 +80,8 @@ class SecurityModule extends WorkerModuleBase {
             }
         } else if (message.event === SecurityModule.SendKeyEventName) {
             this._onSendKey(message);
+        } else if (message.event === SecurityModule.ErrorEventName) {
+            logger.error(message.error);
         } else {
             logger.warn(`[${this.name}] Unsupported event type: "${message.event}"`);
         }
@@ -75,7 +93,7 @@ class SecurityModule extends WorkerModuleBase {
      * @private
      */
     _onSendKey(message) {
-        let data = {key: this._keyFile, hostname: os.hostname(), modules: this.worker.modules};
+        let data = {key: this._secureKey, hostname: os.hostname(), modules: this.worker.modules};
         this.worker.sendMessage(this.createMessage(message.event, null, data));
     }
 }
