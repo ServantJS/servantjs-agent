@@ -99,7 +99,7 @@ class MiddlewareStack extends EventEmitter {
             (next) => {
                 try {
                     layer = stack[index];
-
+                    
                     if (searchRoute && layer.route !== 'dummy' && searchRoute.toLowerCase() !== layer.route) {
                         index++;
                         return next();
