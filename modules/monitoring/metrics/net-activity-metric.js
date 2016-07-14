@@ -29,11 +29,10 @@ exports.get = (cb) => {
                 () => i < current.length,
                 (next) => {
                     try {
-                        const iName = current[i].name;
+                        const iName = current[i++].name;
                         if (inets.hasOwnProperty(iName) || iName === 'total') {
                             result[iName] = current[i];
                         } else {
-                            ++i;
                             return next();
                         }
 
@@ -63,6 +62,37 @@ exports.get = (cb) => {
             );
         }
     ], (err, res) => {
-        cb(err ? new Error(err) : null, res);
+        if (err) {
+            cb(err, {});
+        } else {
+            const ts = new Date();
+            const obj = {
+                'system.net.bytes.in': {measure: 'bytes', ts: ts, value: res['total'].bytes.input},
+                'system.net.bytes.out': {measure: 'bytes', ts: ts, value: res['total'].bytes.output},
+                'system.net.packets.in': {measure: 'bytes', ts: ts, value: res['total'].packets.input},
+                'system.net.packets.out': {measure: 'bytes', ts: ts, value: res['total'].packets.output},
+                'system.net.bytes.in.per_sec': {measure: 'bytes', ts: ts, value: res['total'].per_sec.bytes.input},
+                'system.net.bytes.out.per_sec': {measure: 'bytes', ts: ts, value: res['total'].per_sec.bytes.output},
+                'system.net.packets.in.per_sec': {measure: 'bytes', ts: ts, value: res['total'].per_sec.packets.input},
+                'system.net.packets.out.per_sec': {measure: 'bytes', ts: ts, value: res['total'].per_sec.packets.output}
+            };
+
+            for (let k in res) {
+                if (!res.hasOwnProperty(k) || k == 'total') {
+                    continue;
+                }
+
+                obj[`system.net.${k}.bytes.in`] = {measure: 'bytes', ts: ts, value: res['total'].bytes.input, component: k};
+                obj[`system.net.${k}.bytes.out`] = {measure: 'bytes', ts: ts, value: res['total'].bytes.output, component: k};
+                obj[`system.net.${k}.packets.in`] = {measure: 'bytes', ts: ts, value: res['total'].packets.input, component: k};
+                obj[`system.net.${k}.packets.out`] = {measure: 'bytes', ts: ts, value: res['total'].packets.output, component: k};
+                obj[`system.net.${k}.bytes.in.per_sec`] = {measure: 'bps', ts: ts, value: res['total'].per_sec.bytes.input, component: k};
+                obj[`system.net.${k}.bytes.out.per_sec`] = {measure: 'bps', ts: ts, value: res['total'].per_sec.bytes.output, component: k};
+                obj[`system.net.${k}.packets.in.per_sec`] = {measure: 'bps', ts: ts, value: res['total'].per_sec.packets.input, component: k};
+                obj[`system.net.${k}.packets.out.per_sec`] = {measure: 'bps', ts: ts, value: res['total'].per_sec.packets.output, component: k};
+            }
+
+            cb(null, obj);
+        }
     });
 };

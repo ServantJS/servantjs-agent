@@ -30,6 +30,28 @@
         "middlewares": [],
         "modules": []
       },
+      "nodes": [
+        {
+          "host": "185.71.65.232",
+          "hostname": "localhost.localdomain",
+          "community": "vsnl"
+        }
+      ],
+      "node_type": {
+        "firewall": [
+          {"vendor": "netgear","oid": "1.3.6.1.4.1.4526.100.6"}
+        ],
+        "router": [
+          {"vendor": "cisco", "oid": "1.3.6.1.4.1.9.1.3"},
+          {"vendor": "netgear", "oid": "1.3.6.1.4.1.4526.100.5"}
+        ],
+        "switch": [
+          {"vendor": "netgear", "oid": "1.3.6.1.4.1.4526.100.1"},
+          {"vendor": "netgear", "oid": "1.3.6.1.4.1.4526.100.10"},
+          {"vendor": "netgear", "oid": "1.3.6.1.4.1.4526.100.2"},
+          {"vendor": "netgear", "oid": "1.3.6.1.4.1.4526.100.4"}
+        ]
+      },
       "haproxy": {
         "statUnixSocket": "/tmp/haproxy.stats"
       }

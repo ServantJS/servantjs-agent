@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const os = require('os');
+const async = require('async');
 
 const WorkerModuleBase = require('../core').WorkerModuleBase;
 const ServantMessage = require('../message').ServantMessage;
@@ -10,10 +11,14 @@ const logger = require('../core').logger;
 
 const cpuMetric = require('./metrics/cpu-metric');
 const ramMetric = require('./metrics/ram-metric');
-const nodeMetric = require('./metrics/node-details-metric');
+
 const netActivityMetric = require('./metrics/net-activity-metric');
 
 const haproxyMetric = require('./metrics/haproxy-metric');
+
+const nodeMetric = require('./metrics/node-details-metric');
+const snmpMetric = require('./metrics/snmp-metric');
+
 
 const MODULE_NAME = 'monitoring';
 const MODULE_VERSION = '1.0';
@@ -28,6 +33,7 @@ class MonitoringModule extends WorkerModuleBase {
         super(worker);
 
         this._options = options;
+        this._snmpNodes = options.nodes || [];
     }
 
     /**
@@ -58,60 +64,79 @@ class MonitoringModule extends WorkerModuleBase {
     }
 
     _onCollect(message) {
-        switch (message.data.metric) {
-            case 'os_cpu':
-                cpuMetric.usagePerSecond((res) => {
-                    this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, null,
-                        {id: message.data.id, metric: message.data.metric, value: res})
-                    );
-                });
-
-                break;
-            case 'os_ram':
-                this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, null,
-                    {id: message.data.id, metric: message.data.metric, value: ramMetric.usage()})
-                );
-                break;
-            case 'os_net_a':
-                netActivityMetric.get((err, res) => {
-                    if (err) {
-                        logger.error(err.message);
-                        logger.verbose(err.stack);
-                    }
-
-                    this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, err ? err.message : null,
-                        {id: message.data.id, metric: message.data.metric, value: res})
-                    );
-                });
-                break;
-            case 'node_details':
+        async.waterfall([
+            (cb) => {
                 nodeMetric.get((err, res) => {
                     if (err) {
                         logger.error(err.message);
                         logger.verbose(err.stack);
                     }
 
-                    this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, err ? err.message : null,
-                        {id: message.data.id, metric: message.data.metric, value: res})
-                    );
+                    cb(err, {agent: res});
                 });
-
-                break;
-            case 'hp_stat':
-                haproxyMetric.get({statUnixSocket: this._options.haproxy.statUnixSocket}, (err, res) => {
+            },
+            (data, cb) => {
+                snmpMetric.info({nodes: this._snmpNodes, node_type: {node_type: this._options.node_type}}, (err, res) => {
                     if (err) {
                         logger.error(err.message);
                         logger.verbose(err.stack);
                     }
 
-                    this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, err ? err.message : null,
-                        {id: message.data.id, metric: message.data.metric, value: res})
-                    );
+                    data.nodes = res;
+                    data.nodes.push(data.agent);
+
+                    delete data.agent;
+                    
+                    this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, null, {details: data}));
+
+                    cb(null);
                 });
-                break;
-            default:
-                break;
-        }
+            },
+            (cb) => {
+                cpuMetric.usagePerSecond((res) => {
+                    cb(null, {agent: res});
+                });
+            },
+            (data, cb) => {
+                const ram = ramMetric.usage();
+                for (let k in ram) {
+                    data.agent[k] = ram[k];
+                }
+                
+                cb(null, data);
+            },
+            (data, cb) => {
+                netActivityMetric.get((err, res) => {
+                    if (err) {
+                        logger.error(err.message);
+                        logger.verbose(err.stack);
+                    }
+
+                    for (let k in res) {
+                        data.agent[k] = res[k];
+                    }
+
+                    cb(null, data);
+                });
+            },
+            (data, cb) => {
+                snmpMetric.get({nodes: this._snmpNodes}, (err, res) => {
+                    if (err) {
+                        logger.error(err.message);
+                        logger.verbose(err.stack);
+                    }
+
+                    data.nodes = res;
+                    data.nodes.push({hostname: os.hostname(), metrics: data.agent});
+                    
+                    delete data.agent;
+                    
+                    cb(null, data);
+                });
+            }
+        ], (err, data) => {
+            this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, null, {metrics: data}));
+        });
     }
 }
 

@@ -50,7 +50,7 @@ class CPUInfo {
         this.cores = new Array(cpus.length);
 
         let i = cpus.length;
-        while(i--) {
+        while (i--) {
             this.cores[i] = new CPUCoreInfo(cpus[i].times);
         }
     }
@@ -61,21 +61,49 @@ exports.usagePerSecond = (cb) => {
 
     setTimeout(() => {
         let currentInfo = new CPUInfo();
-        
-        const result = new Array(currentInfo.cores.length);
-        let i = result.length;
-        while(i--) {
-            result[i] = {
-                name: 'cpu' + i,
-                system: CPUCoreInfo.getSystemTime(currentInfo.cores[i], previousInfo.cores[i]),
-                user: CPUCoreInfo.getUserTime(currentInfo.cores[i], previousInfo.cores[i]),
-                total: CPUCoreInfo.getTotalTime(currentInfo.cores[i], previousInfo.cores[i])
-            }
+
+        const result = {};
+
+        let i = currentInfo.cores.length;
+        let system = 0;
+        let user = 0;
+        let total = 0;
+
+        const ts = new Date();
+
+        while (i--) {
+            result[`system.cpu.${i}.system`] = {
+                measure: '%',
+                ts: ts,
+                component: i,
+                value: CPUCoreInfo.getSystemTime(currentInfo.cores[i], previousInfo.cores[i])
+            };
+
+            result[`system.cpu.${i}.user`] = {
+                measure: '%',
+                ts: ts,
+                component: i,
+                value: CPUCoreInfo.getSystemTime(currentInfo.cores[i], previousInfo.cores[i])
+            };
+            result[`system.cpu.${i}.total`] = {
+                measure: '%',
+                ts: ts,
+                component: i,
+                value: CPUCoreInfo.getSystemTime(currentInfo.cores[i], previousInfo.cores[i])
+            };
+
+            system += result[`system.cpu.${i}.system`].value;
+            user += result[`system.cpu.${i}.user`].value;
+            total += result[`system.cpu.${i}.total`].value;
         }
+
+        result['system.cpu.system'] = {measure: '%', ts: ts, value: system / currentInfo.cores.length};
+        result['system.cpu.user'] = {measure: '%', ts: ts, value: user / currentInfo.cores.length};
+        result['system.cpu.total'] = {measure: '%', ts: ts, value: total / currentInfo.cores.length};
 
         currentInfo = null;
         previousInfo = null;
-        
+
         cb(result);
     }, 1000)
 };
