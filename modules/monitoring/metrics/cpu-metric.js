@@ -90,7 +90,7 @@ exports.usagePerSecond = (rules, cb) => {
                     measure: '%',
                     ts: ts,
                     component: i,
-                    value: CPUCoreInfo.getSystemTime(currentInfo.cores[i], previousInfo.cores[i])
+                    value: CPUCoreInfo.getUserTime(currentInfo.cores[i], previousInfo.cores[i])
                 };
 
                 user += result[`system.cpu.${i}.user`].value;
@@ -99,7 +99,7 @@ exports.usagePerSecond = (rules, cb) => {
                     measure: '%',
                     ts: ts,
                     component: i,
-                    value: CPUCoreInfo.getSystemTime(currentInfo.cores[i], previousInfo.cores[i])
+                    value: CPUCoreInfo.getTotalTime(currentInfo.cores[i], previousInfo.cores[i])
                 };
 
                 total += result[`system.cpu.${i}.total`].value;
