@@ -32,9 +32,9 @@
       },
       "nodes": [
         {
-          "host": "185.71.65.232",
+          "host": "192.168.0.10",
           "hostname": "localhost.localdomain",
-          "community": "vsnl"
+          "community": "password"
         }
       ],
       "node_type": {
