@@ -34,7 +34,7 @@ exports.get = (rules, cb) => {
                 () => i < current.length,
                 (next) => {
                     try {
-                        const iName = current[i++].name;
+                        const iName = current[i].name;
                         if (inets.hasOwnProperty(iName) || iName === 'total') {
                             result[iName] = current[i];
                         } else {
@@ -54,7 +54,7 @@ exports.get = (rules, cb) => {
 
                         delete result[iName].name;
                         delete result[iName].index;
-
+                        ++i;
                         next();
                     } catch (e) {
                         next(e);
