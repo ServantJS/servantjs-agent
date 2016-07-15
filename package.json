@@ -6,6 +6,7 @@
   "dependencies": {
     "async": "^1.5.2",
     "nconf": "^0.8.4",
+    "snmp-native": "^1.0.21",
     "vow": "^0.4.12",
     "winston": "^2.2.0",
     "ws": "^1.1.0"
