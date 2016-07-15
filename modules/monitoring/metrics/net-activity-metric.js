@@ -4,7 +4,11 @@ const async = require('async');
 const os = require('os');
 const net = require('../../../build/Release/netaddon.node');
 
-exports.get = (cb) => {
+function ignoreMetric(rules, metric, component) {
+    return rules.hasOwnProperty(metric) || rules.hasOwnProperty(metric + component);
+}
+
+exports.get = (rules, cb) => {
     async.waterfall([
         (cb) => {
             net.get((err, data) => {
@@ -82,7 +86,15 @@ exports.get = (cb) => {
                     continue;
                 }
 
-                obj[`system.net.${k}.bytes.in`] = {measure: 'bytes', ts: ts, value: res['total'].bytes.input, component: k};
+                if (!ignoreMetric(rules, 'system.net.bytes.in', k)) {
+                    obj[`system.net.${k}.bytes.in`] = {
+                        measure: 'bytes',
+                        ts: ts,
+                        value: res['total'].bytes.input,
+                        component: k
+                    };
+                }
+
                 obj[`system.net.${k}.bytes.out`] = {measure: 'bytes', ts: ts, value: res['total'].bytes.output, component: k};
                 obj[`system.net.${k}.packets.in`] = {measure: 'bytes', ts: ts, value: res['total'].packets.input, component: k};
                 obj[`system.net.${k}.packets.out`] = {measure: 'bytes', ts: ts, value: res['total'].packets.output, component: k};
@@ -90,6 +102,12 @@ exports.get = (cb) => {
                 obj[`system.net.${k}.bytes.out.per_sec`] = {measure: 'bps', ts: ts, value: res['total'].per_sec.bytes.output, component: k};
                 obj[`system.net.${k}.packets.in.per_sec`] = {measure: 'bps', ts: ts, value: res['total'].per_sec.packets.input, component: k};
                 obj[`system.net.${k}.packets.out.per_sec`] = {measure: 'bps', ts: ts, value: res['total'].per_sec.packets.output, component: k};
+            }
+
+            for (var k in obj) {
+                if (ignoreMetric(rules, k)) {
+                    delete obj[k];
+                }
             }
 
             cb(null, obj);

@@ -16,7 +16,7 @@ const netActivityMetric = require('./metrics/net-activity-metric');
 
 const haproxyMetric = require('./metrics/haproxy-metric');
 
-const nodeMetric = require('./metrics/node-details-metric');
+const nodeDetails = require('./metrics/node-details-metric');
 const snmpMetric = require('./metrics/snmp-metric');
 
 
@@ -34,6 +34,8 @@ class MonitoringModule extends WorkerModuleBase {
 
         this._options = options;
         this._snmpNodes = options.nodes || [];
+        
+        this._metricRules = {};
     }
 
     /**
@@ -41,6 +43,13 @@ class MonitoringModule extends WorkerModuleBase {
      */
     static get CollectEvent() {
         return 'Collect';
+    }
+
+    /**
+     * @return {string}
+     */
+    static get UpdateSettingsEvent() {
+        return 'UpdateSettings';
     }
     
     get name() {
@@ -58,21 +67,49 @@ class MonitoringModule extends WorkerModuleBase {
     handle(message) {
         if (message.event === MonitoringModule.CollectEvent) {
             this._onCollect(message);
+        } else if (message.event === MonitoringModule.UpdateSettingsEvent) {
+            this._onUpdateSettings(message);
         } else {
             logger.warn(`[${this.name}] Unsupported event type: "${message.event}"`);
         }
     }
 
+    _onUpdateSettings(message) {
+        this._metricRules = {};
+        
+        if (Array.isArray(message.data)) {
+            let i = message.data.length;
+            
+            while (i--) {
+                const item = message.data[i];
+                this._metricRules[item.sys_name] = {};
+            }
+        }
+    }
+    
     _onCollect(message) {
+        const commonCb = (err, res, data, cb) => {
+            if (err) {
+                logger.error(err.message);
+                logger.verbose(err.stack);
+            }
+
+            for (let k in res) {
+                data[k] = res[k];
+            }
+
+            cb(null, data);
+        };
+
         async.waterfall([
             (cb) => {
-                nodeMetric.get((err, res) => {
+                nodeDetails.get((err, res) => {
                     if (err) {
                         logger.error(err.message);
                         logger.verbose(err.stack);
                     }
 
-                    cb(err, {agent: res});
+                    cb(err, res);
                 });
             },
             (data, cb) => {
@@ -82,41 +119,32 @@ class MonitoringModule extends WorkerModuleBase {
                         logger.verbose(err.stack);
                     }
 
-                    data.nodes = res;
-                    data.nodes.push(data.agent);
+                    const nodes = res;
+                    nodes.push(data);
 
-                    delete data.agent;
-                    
-                    this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, null, {details: data}));
+                    this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, null, {details: nodes}));
 
                     cb(null);
                 });
             },
             (cb) => {
-                cpuMetric.usagePerSecond((res) => {
-                    cb(null, {agent: res});
-                });
-            },
-            (data, cb) => {
-                const ram = ramMetric.usage();
-                for (let k in ram) {
-                    data.agent[k] = ram[k];
-                }
-                
-                cb(null, data);
-            },
-            (data, cb) => {
-                netActivityMetric.get((err, res) => {
+                cpuMetric.usagePerSecond(this._metricRules, (err, res) => {
                     if (err) {
                         logger.error(err.message);
                         logger.verbose(err.stack);
                     }
 
-                    for (let k in res) {
-                        data.agent[k] = res[k];
-                    }
-
-                    cb(null, data);
+                    cb(null, res);
+                });
+            },
+            (data, cb) => {
+                ramMetric.get(this._metricRules, (err, res) => {
+                    commonCb(err, res, data, cb);
+                });
+            },
+            (data, cb) => {
+                netActivityMetric.get(this._metricRules, (err, res) => {
+                    commonCb(err, res, data, cb);
                 });
             },
             (data, cb) => {
@@ -126,12 +154,10 @@ class MonitoringModule extends WorkerModuleBase {
                         logger.verbose(err.stack);
                     }
 
-                    data.nodes = res;
-                    data.nodes.push({hostname: os.hostname(), metrics: data.agent});
-                    
-                    delete data.agent;
-                    
-                    cb(null, data);
+                    const nodes = res;
+                    nodes.push({hostname: os.hostname(), metrics: data});
+
+                    cb(null, nodes);
                 });
             }
         ], (err, data) => {

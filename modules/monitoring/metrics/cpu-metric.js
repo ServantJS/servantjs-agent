@@ -56,54 +56,72 @@ class CPUInfo {
     }
 }
 
-exports.usagePerSecond = (cb) => {
+function ignoreMetric(rules, metric, component) {
+    return rules.hasOwnProperty(metric) || rules.hasOwnProperty(metric + component);
+}
+
+exports.usagePerSecond = (rules, cb) => {
     let previousInfo = new CPUInfo();
 
     setTimeout(() => {
-        let currentInfo = new CPUInfo();
+        try {
+            let currentInfo = new CPUInfo();
 
-        const result = {};
+            const result = {};
 
-        let i = currentInfo.cores.length;
-        let system = 0;
-        let user = 0;
-        let total = 0;
+            let i = currentInfo.cores.length;
+            let system = 0;
+            let user = 0;
+            let total = 0;
 
-        const ts = new Date();
+            const ts = new Date();
 
-        while (i--) {
-            result[`system.cpu.${i}.system`] = {
-                measure: '%',
-                ts: ts,
-                component: i,
-                value: CPUCoreInfo.getSystemTime(currentInfo.cores[i], previousInfo.cores[i])
-            };
+            while (i--) {
+                result[`system.cpu.${i}.system`] = {
+                    measure: '%',
+                    ts: ts,
+                    component: i,
+                    value: CPUCoreInfo.getSystemTime(currentInfo.cores[i], previousInfo.cores[i])
+                };
 
-            result[`system.cpu.${i}.user`] = {
-                measure: '%',
-                ts: ts,
-                component: i,
-                value: CPUCoreInfo.getSystemTime(currentInfo.cores[i], previousInfo.cores[i])
-            };
-            result[`system.cpu.${i}.total`] = {
-                measure: '%',
-                ts: ts,
-                component: i,
-                value: CPUCoreInfo.getSystemTime(currentInfo.cores[i], previousInfo.cores[i])
-            };
+                system += result[`system.cpu.${i}.system`].value;
 
-            system += result[`system.cpu.${i}.system`].value;
-            user += result[`system.cpu.${i}.user`].value;
-            total += result[`system.cpu.${i}.total`].value;
+                result[`system.cpu.${i}.user`] = {
+                    measure: '%',
+                    ts: ts,
+                    component: i,
+                    value: CPUCoreInfo.getSystemTime(currentInfo.cores[i], previousInfo.cores[i])
+                };
+
+                user += result[`system.cpu.${i}.user`].value;
+
+                result[`system.cpu.${i}.total`] = {
+                    measure: '%',
+                    ts: ts,
+                    component: i,
+                    value: CPUCoreInfo.getSystemTime(currentInfo.cores[i], previousInfo.cores[i])
+                };
+
+                total += result[`system.cpu.${i}.total`].value;
+            }
+
+            result['system.cpu.system'] = {measure: '%', ts: ts, value: system / currentInfo.cores.length};
+            result['system.cpu.user'] = {measure: '%', ts: ts, value: user / currentInfo.cores.length};
+            result['system.cpu.total'] = {measure: '%', ts: ts, value: total / currentInfo.cores.length};
+
+
+            currentInfo = null;
+            previousInfo = null;
+
+            for (var k in result) {
+                if (ignoreMetric(rules, k)) {
+                    delete result[k];
+                }
+            }
+
+            cb(null, result);
+        } catch (e) {
+            cb(e, {});
         }
-
-        result['system.cpu.system'] = {measure: '%', ts: ts, value: system / currentInfo.cores.length};
-        result['system.cpu.user'] = {measure: '%', ts: ts, value: user / currentInfo.cores.length};
-        result['system.cpu.total'] = {measure: '%', ts: ts, value: total / currentInfo.cores.length};
-
-        currentInfo = null;
-        previousInfo = null;
-
-        cb(result);
     }, 1000)
 };
