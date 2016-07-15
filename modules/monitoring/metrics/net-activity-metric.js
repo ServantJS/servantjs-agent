@@ -86,6 +86,7 @@ exports.get = (rules, cb) => {
                     continue;
                 }
 
+                obj[`system.net.${k}.bytes.in`] = {measure: 'bytes', ts: ts, value: res['total'].bytes.input, component: k};
                 obj[`system.net.${k}.bytes.out`] = {measure: 'bytes', ts: ts, value: res['total'].bytes.output, component: k};
                 obj[`system.net.${k}.packets.in`] = {measure: 'bytes', ts: ts, value: res['total'].packets.input, component: k};
                 obj[`system.net.${k}.packets.out`] = {measure: 'bytes', ts: ts, value: res['total'].packets.output, component: k};
