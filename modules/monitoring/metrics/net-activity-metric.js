@@ -35,26 +35,30 @@ exports.get = (rules, cb) => {
                 (next) => {
                     try {
                         const iName = current[i].name;
+                        const a = current[i];
+                        const b = previous[i];
+                        i++;
+
                         if (inets.hasOwnProperty(iName) || iName === 'total') {
-                            result[iName] = current[i];
+                            result[iName] = a;
                         } else {
                             return next();
                         }
 
                         result[iName].per_sec = {
                             packets: {
-                                input: current[i].packets.input - previous[i].packets.input,
-                                output: current[i].packets.output - previous[i].packets.output
+                                input: a.packets.input - b.packets.input,
+                                output: a.packets.output - b.packets.output
                             },
                             bytes: {
-                                input: current[i].bytes.input - previous[i].bytes.input,
-                                output: current[i].bytes.output - previous[i].bytes.output
+                                input: a.bytes.input - b.bytes.input,
+                                output: a.bytes.output - b.bytes.output
                             }
                         };
 
                         delete result[iName].name;
                         delete result[iName].index;
-                        ++i;
+
                         next();
                     } catch (e) {
                         next(e);
