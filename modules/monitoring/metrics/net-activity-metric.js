@@ -27,6 +27,7 @@ exports.get = (rules, cb) => {
             current.sort((a, b) => a.index - b.index);
 
             const inets = os.networkInterfaces();
+
             const result = {};
             let i = 0;
             async.whilst(
@@ -54,7 +55,6 @@ exports.get = (rules, cb) => {
                         delete result[iName].name;
                         delete result[iName].index;
 
-                        ++i;
                         next();
                     } catch (e) {
                         next(e);
@@ -84,15 +84,6 @@ exports.get = (rules, cb) => {
             for (let k in res) {
                 if (!res.hasOwnProperty(k) || k == 'total') {
                     continue;
-                }
-
-                if (!ignoreMetric(rules, 'system.net.bytes.in', k)) {
-                    obj[`system.net.${k}.bytes.in`] = {
-                        measure: 'bytes',
-                        ts: ts,
-                        value: res['total'].bytes.input,
-                        component: k
-                    };
                 }
 
                 obj[`system.net.${k}.bytes.out`] = {measure: 'bytes', ts: ts, value: res['total'].bytes.output, component: k};
