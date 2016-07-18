@@ -8,7 +8,7 @@ function ignoreMetric(rules, metric, component) {
     return rules.hasOwnProperty(metric) || rules.hasOwnProperty(metric + component);
 }
 
-exports.get = (rules, cb) => {
+exports.get = (options, rules, cb) => {
     async.waterfall([
         (cb) => {
             net.get((err, data) => {
@@ -106,7 +106,7 @@ exports.get = (rules, cb) => {
                 }
             }
 
-            cb(null, obj);
+            cb(null, {hostname: os.hostname(), metrics: obj});
         }
     });
 };

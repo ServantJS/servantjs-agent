@@ -9,16 +9,7 @@ const ServantMessage = require('../message').ServantMessage;
 
 const logger = require('../core').logger;
 
-const cpuMetric = require('./metrics/cpu-metric');
-const ramMetric = require('./metrics/ram-metric');
-
-const netActivityMetric = require('./metrics/net-activity-metric');
-
-const haproxyMetric = require('./metrics/haproxy-metric');
-
-const nodeDetails = require('./metrics/node-details-metric');
-const snmpMetric = require('./metrics/snmp-metric');
-
+const metrics = require('./metrics');
 
 const MODULE_NAME = 'monitoring';
 const MODULE_VERSION = '1.0';
@@ -33,9 +24,10 @@ class MonitoringModule extends WorkerModuleBase {
         super(worker);
 
         this._options = options;
-        this._snmpNodes = options.nodes || [];
-        
         this._metricRules = {};
+        this._metrics = metrics.load();
+        
+        console.log(this._options);
     }
 
     /**
@@ -77,91 +69,49 @@ class MonitoringModule extends WorkerModuleBase {
     _onUpdateSettings(message) {
         this._metricRules = {};
         
-        if (Array.isArray(message.data)) {
-            let i = message.data.length;
+        if (message.data.hasOwnProperty('rules') && Array.isArray(message.data.rules)) {
+            let i = message.data.rules.length;
             
             while (i--) {
-                const item = message.data[i];
+                const item = message.data.rules[i];
                 this._metricRules[item.sys_name] = {};
             }
         }
     }
     
     _onCollect(message) {
-        const commonCb = (err, res, data, cb) => {
+        const data = {details: [], metrics: []};
+
+        const cb = (err, res, storage, next) => {
             if (err) {
                 logger.error(err.message);
                 logger.verbose(err.stack);
+            } else {
+                if (Array.isArray(res)) {
+                    res.unshift(0, 0);
+                    Array.prototype.splice.apply(storage, res);
+                } else {
+                    storage.push(res);
+                }
             }
 
-            for (let k in res) {
-                data[k] = res[k];
-            }
-
-            cb(null, data);
+            next();
         };
-
-        async.waterfall([
-            (cb) => {
-                nodeDetails.get((err, res) => {
-                    if (err) {
-                        logger.error(err.message);
-                        logger.verbose(err.stack);
-                    }
-
-                    cb(err, res);
+        
+        async.each(this._metrics, (metric, next) => {
+            if (metric.type === 'details') {
+                metric.handler(this._options, (err, res) => {
+                    cb(err, res, data.details, next);
                 });
-            },
-            (data, cb) => {
-                snmpMetric.info({nodes: this._snmpNodes, node_type: {node_type: this._options.node_type}}, (err, res) => {
-                    if (err) {
-                        logger.error(err.message);
-                        logger.verbose(err.stack);
-                    }
-
-                    const nodes = res;
-                    nodes.push(data);
-
-                    this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, null, {details: nodes}));
-
-                    cb(null);
+            } else if (metric.type === 'metrics') {
+                metric.handler(this._options, this._metricRules, (err, res) => {
+                    cb(err, res, data.metrics, next);
                 });
-            },
-            (cb) => {
-                cpuMetric.usagePerSecond(this._metricRules, (err, res) => {
-                    if (err) {
-                        logger.error(err.message);
-                        logger.verbose(err.stack);
-                    }
-
-                    cb(null, res);
-                });
-            },
-            (data, cb) => {
-                ramMetric.get(this._metricRules, (err, res) => {
-                    commonCb(err, res, data, cb);
-                });
-            },
-            (data, cb) => {
-                netActivityMetric.get(this._metricRules, (err, res) => {
-                    commonCb(err, res, data, cb);
-                });
-            },
-            (data, cb) => {
-                snmpMetric.get({nodes: this._snmpNodes}, (err, res) => {
-                    if (err) {
-                        logger.error(err.message);
-                        logger.verbose(err.stack);
-                    }
-
-                    const nodes = res;
-                    nodes.push({hostname: os.hostname(), metrics: data});
-
-                    cb(null, nodes);
-                });
+            } else {
+                next(new Error('Incorrect metric handler type'));
             }
-        ], (err, data) => {
-            this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, null, {metrics: data}));
+        }, (err) => {
+            this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, null, data));
         });
     }
 }

@@ -4,7 +4,7 @@ const os = require('os');
 const async = require('async');
 const exec = require('child_process').exec;
 
-exports.get = (cb) => {
+exports.get = (optionsw, cb) => {
     const obj = {
         ts: new Date(),
         system: {
@@ -25,7 +25,7 @@ exports.get = (cb) => {
             obj.system.version = version.trim();
             obj.system.kernel = kernel.trim();
             obj.inets = net;
-            
+
             cb(null, obj);
         }
     };

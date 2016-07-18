@@ -60,7 +60,7 @@ function ignoreMetric(rules, metric, component) {
     return rules.hasOwnProperty(metric) || rules.hasOwnProperty(metric + component);
 }
 
-exports.usagePerSecond = (rules, cb) => {
+exports.get = (options, rules, cb) => {
     let previousInfo = new CPUInfo();
 
     setTimeout(() => {
@@ -119,7 +119,7 @@ exports.usagePerSecond = (rules, cb) => {
                 }
             }
 
-            cb(null, result);
+            cb(null, {hostname: os.hostname(), metrics: result});
         } catch (e) {
             cb(e, {});
         }

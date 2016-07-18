@@ -37,6 +37,10 @@ const oidForDetails = {
     '.1.3.6.1.2.1.4.20.1.3': 'snmp.inet.ip.mask'
 };
 
+function ignoreMetric(rules, metric, component) {
+    return rules.hasOwnProperty(metric) || rules.hasOwnProperty(metric + component);
+}
+
 class SNMPClient {
     constructor(host, hostname, port, community, options) {
         this.host = host;
@@ -239,7 +243,7 @@ class SNMPClient {
         });
     }
 
-    _getMetricsWithPer(cb) {
+    _getNetAMetricsWithPer(cb) {
         let i = 0;
         const keys = Object.keys(oid);
 
@@ -288,14 +292,14 @@ class SNMPClient {
         );
     }
 
-    getMetrics(cb) {
+    getNetAMetrics(cb) {
         async.waterfall([
             (cb) => {
-                this._getMetricsWithPer(cb);
+                this._getNetAMetricsWithPer(cb);
             },
             (previous, cb) => {
                 setTimeout(() => {
-                    this._getMetricsWithPer((err, res) => {
+                    this._getNetAMetricsWithPer((err, res) => {
                         if (err) {
                             cb(err);
                         } else {
@@ -385,6 +389,12 @@ class SNMPClient {
                         obj.metrics[`system.net.bytes.out.per_sec`].value += current['snmp.inet.packets.out'] - prev['snmp.inet.packets.out'];
                     }
 
+                    for (var k in obj.metrics) {
+                        if (ignoreMetric(this.options.rules, k)) {
+                            delete obj[k];
+                        }
+                    }
+
                     cb(null, obj);
                 } catch (e) {
                     cb(e);
@@ -394,7 +404,7 @@ class SNMPClient {
     }
 }
 
-function get(options, method, cb) {
+module.exports = (options, method, cb) => {
     options = options || {};
 
     if (!options.nodes) {
@@ -406,9 +416,9 @@ function get(options, method, cb) {
     }
 
     const nodeData = [];
-
+    
     async.each(options.nodes, (node, next) => {
-        const client = new SNMPClient(node.host, node.hostname, node.port || 161, node.community, options.node_type);
+        const client = new SNMPClient(node.host, node.hostname, node.port || 161, node.community, options);
 
         client[method]((err, data) => {
             if (!err) {
@@ -420,12 +430,4 @@ function get(options, method, cb) {
     }, (err) => {
         cb(err, nodeData);
     });
-}
-
-exports.info = (options, cb) => {
-    get(options, 'getNodeDetails', cb);
-};
-
-exports.get = (options, cb) => {
-    get(options, 'getMetrics', cb);
 };
