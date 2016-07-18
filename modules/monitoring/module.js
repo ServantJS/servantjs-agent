@@ -26,8 +26,6 @@ class MonitoringModule extends WorkerModuleBase {
         this._options = options;
         this._metricRules = {};
         this._metrics = metrics.load();
-        
-        console.log(this._options);
     }
 
     /**
@@ -86,7 +84,7 @@ class MonitoringModule extends WorkerModuleBase {
             if (err) {
                 logger.error(err.message);
                 logger.verbose(err.stack);
-            } else {
+            } else if (res) {
                 if (Array.isArray(res)) {
                     res.unshift(0, 0);
                     Array.prototype.splice.apply(storage, res);

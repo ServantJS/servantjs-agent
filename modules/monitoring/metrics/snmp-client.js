@@ -408,7 +408,7 @@ module.exports = (options, method, cb) => {
     options = options || {};
 
     if (!options.nodes) {
-        return cb();
+        return cb(null, null);
     }
 
     if (!Array.isArray(options.nodes)) {
