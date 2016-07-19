@@ -77,12 +77,12 @@ exports.get = (options, rules, cb) => {
             const obj = {
                 'system.net.bytes.in': {measure: 'bytes', ts: ts, value: res['total'].bytes.input},
                 'system.net.bytes.out': {measure: 'bytes', ts: ts, value: res['total'].bytes.output},
-                'system.net.packets.in': {measure: 'bytes', ts: ts, value: res['total'].packets.input},
-                'system.net.packets.out': {measure: 'bytes', ts: ts, value: res['total'].packets.output},
-                'system.net.bytes.in.per_sec': {measure: 'bytes', ts: ts, value: res['total'].per_sec.bytes.input},
-                'system.net.bytes.out.per_sec': {measure: 'bytes', ts: ts, value: res['total'].per_sec.bytes.output},
-                'system.net.packets.in.per_sec': {measure: 'bytes', ts: ts, value: res['total'].per_sec.packets.input},
-                'system.net.packets.out.per_sec': {measure: 'bytes', ts: ts, value: res['total'].per_sec.packets.output}
+                'system.net.packets.in': {measure: '', ts: ts, value: res['total'].packets.input},
+                'system.net.packets.out': {measure: '', ts: ts, value: res['total'].packets.output},
+                'system.net.bytes.in.per_sec': {measure: 'bps', ts: ts, value: res['total'].per_sec.bytes.input},
+                'system.net.bytes.out.per_sec': {measure: 'bps', ts: ts, value: res['total'].per_sec.bytes.output},
+                'system.net.packets.in.per_sec': {measure: 'pps', ts: ts, value: res['total'].per_sec.packets.input},
+                'system.net.packets.out.per_sec': {measure: 'pps', ts: ts, value: res['total'].per_sec.packets.output}
             };
 
             for (let k in res) {
@@ -92,12 +92,12 @@ exports.get = (options, rules, cb) => {
 
                 obj[`system.net.${k}.bytes.in`] = {measure: 'bytes', ts: ts, value: res['total'].bytes.input, component: k};
                 obj[`system.net.${k}.bytes.out`] = {measure: 'bytes', ts: ts, value: res['total'].bytes.output, component: k};
-                obj[`system.net.${k}.packets.in`] = {measure: 'bytes', ts: ts, value: res['total'].packets.input, component: k};
-                obj[`system.net.${k}.packets.out`] = {measure: 'bytes', ts: ts, value: res['total'].packets.output, component: k};
+                obj[`system.net.${k}.packets.in`] = {measure: '', ts: ts, value: res['total'].packets.input, component: k};
+                obj[`system.net.${k}.packets.out`] = {measure: '', ts: ts, value: res['total'].packets.output, component: k};
                 obj[`system.net.${k}.bytes.in.per_sec`] = {measure: 'bps', ts: ts, value: res['total'].per_sec.bytes.input, component: k};
                 obj[`system.net.${k}.bytes.out.per_sec`] = {measure: 'bps', ts: ts, value: res['total'].per_sec.bytes.output, component: k};
-                obj[`system.net.${k}.packets.in.per_sec`] = {measure: 'bps', ts: ts, value: res['total'].per_sec.packets.input, component: k};
-                obj[`system.net.${k}.packets.out.per_sec`] = {measure: 'bps', ts: ts, value: res['total'].per_sec.packets.output, component: k};
+                obj[`system.net.${k}.packets.in.per_sec`] = {measure: 'pps', ts: ts, value: res['total'].per_sec.packets.input, component: k};
+                obj[`system.net.${k}.packets.out.per_sec`] = {measure: 'pps', ts: ts, value: res['total'].per_sec.packets.output, component: k};
             }
 
             for (var k in obj) {
