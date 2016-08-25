@@ -10,6 +10,7 @@
   "modules": [
     {
       "name": "security",
+      "enabled": true,
       "accessKey": "123",
       "depends": {
         "middlewares": [],
@@ -18,6 +19,7 @@
     },
     {
       "name": "haproxy",
+      "enabled": true,
       "configPath": "./tmp/haproxy.conf",
       "depends": {
         "middlewares": [],
@@ -26,15 +28,16 @@
     },
     {
       "name": "monitoring",
+      "enabled": false,
       "depends": {
         "middlewares": [],
         "modules": []
       },
       "nodes": [
         {
-          "host": "192.168.0.10",
-          "hostname": "localhost.localdomain",
-          "community": "password"
+          "host": "185.71.65.232",
+          "hostname": "demo.servantjs.local",
+          "community": "nomansky"
         }
       ],
       "node_type": {
@@ -58,6 +61,7 @@
     },
     {
       "name": "nginx",
+      "enabled": true,
       "linkPath": "./tmp/nginx/links",
       "depends": {
         "middlewares": [],

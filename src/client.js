@@ -140,6 +140,10 @@ class ServantWorker extends MiddlewareStack {
 
     loadModules() {
         this.modulesOptions.forEach((item) => {
+            if (!item.enabled) {
+                return;
+            }
+            
             const temp = require(path.join(path.dirname(module.parent.filename), 'modules', item.name))(this, item);
 
             if (item.hasOwnProperty('depends')) {
