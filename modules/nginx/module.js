@@ -14,9 +14,8 @@ const trans = require('../../lib/transaction');
 const MODULE_NAME = 'nginx';
 const MODULE_VERSION = '1.0';
 
-const EVENT_LIST = [
-    'Create'
-];
+const NGINX_TEST_CMD = 'nginx -t';
+const NGINX_RELOAD_CMD = 'nginx -s reload';
 
 class NGINXModule extends WorkerModuleBase {
     /**
@@ -140,7 +139,7 @@ class NGINXModule extends WorkerModuleBase {
         const seq = [
             {func: trans.writeFile, args: [sourcePath, message.data.content]},
             {func: trans.createLink, args: [sourcePath, linkPath]},
-            {func: trans.exec, args: [`nginx -s reload`]}
+            {func: trans.exec, args: [NGINX_RELOAD_CMD]}
         ];
 
         if (message.data.kind == 0) {
@@ -150,7 +149,7 @@ class NGINXModule extends WorkerModuleBase {
         const rSeq = [
             {func: trans.removeFile, args: [sourcePath]},
             {func: trans.removeLink, args: [linkPath]},
-            {func: trans.exec, args: [`nginx -s reload`]}
+            {func: trans.exec, args: [NGINX_RELOAD_CMD]}
         ];
 
         if (message.data.kind == 0) {
@@ -171,20 +170,19 @@ class NGINXModule extends WorkerModuleBase {
 
         const seq = [
             {func: trans.removeLink, args: [linkPath]},
-            {func: trans.exec, args: [`nginx -t`]},
+            {func: trans.exec, args: [NGINX_TEST_CMD]},
             {func: trans.removeFile, args: [sourcePath]},
-            {func: trans.exec, args: [`nginx -s reload`]}
+            {func: trans.exec, args: [NGINX_RELOAD_CMD]}
         ];
 
         if (message.data.kind == 0 || message.data.isPaused) {
-            seq.splice(0, 1);
-            seq.splice(0, 1);
+            seq.splice(0, 2);
         }
 
         const rSeq = [
             {func: trans.createLink, args: [sourcePath, linkPath]},
             {func: trans.writeFile, args: [sourcePath, message.data.content]},
-            {func: trans.exec, args: [`nginx -s reload`]}
+            {func: trans.exec, args: [NGINX_RELOAD_CMD]}
         ];
 
         if (message.data.kind == 0 || message.data.isPaused) {
@@ -208,12 +206,12 @@ class NGINXModule extends WorkerModuleBase {
 
         let seq = [
             {func: trans.writeFile, args: [sourcePath, message.data.content]},
-            {func: trans.exec, args: [`nginx -s reload`]}
+            {func: trans.exec, args: [NGINX_RELOAD_CMD]}
         ];
 
         let rSeq = [
             {func: trans.writeFile, args: [sourcePath, message.data.oldContent]},
-            {func: trans.exec, args: [`nginx -s reload`]}
+            {func: trans.exec, args: [NGINX_RELOAD_CMD]}
         ];
 
         if (message.data.name !== message.data.oldName) {
@@ -222,7 +220,7 @@ class NGINXModule extends WorkerModuleBase {
                 {func: trans.removeLink, args: [linkPathOld]},
                 {func: trans.writeFile, args: [sourcePath, message.data.content]},
                 {func: trans.createLink, args: [sourcePath, linkPath]},
-                {func: trans.exec, args: [`nginx -s reload`]}
+                {func: trans.exec, args: [NGINX_RELOAD_CMD]}
             ];
 
             if (message.data.kind == 0) {
@@ -235,7 +233,7 @@ class NGINXModule extends WorkerModuleBase {
                 {func: trans.removeLink, args: [linkPath]},
                 {func: trans.writeFile, args: [sourcePathOld, message.data.oldContent]},
                 {func: trans.createLink, args: [sourcePathOld, linkPathOld]},
-                {func: trans.exec, args: [`nginx -s reload`]}
+                {func: trans.exec, args: [NGINX_RELOAD_CMD]}
             ];
 
             if (message.data.kind == 0) {
@@ -258,7 +256,7 @@ class NGINXModule extends WorkerModuleBase {
         
         const seq = [
             {func: trans.createLink, args: [sourcePath, linkPath]},
-            {func: trans.exec, args: [`nginx -s reload`]}
+            {func: trans.exec, args: [NGINX_RELOAD_CMD]}
         ];
         
         if (message.data.status) {
@@ -267,7 +265,7 @@ class NGINXModule extends WorkerModuleBase {
 
         const rSeq = [
             {func: trans.removeLink, args: [linkPath]},
-            {func: trans.exec, args: [`nginx -s reload`]}
+            {func: trans.exec, args: [NGINX_RELOAD_CMD]}
         ];
 
         if (message.data.status) {
