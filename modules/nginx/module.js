@@ -135,7 +135,7 @@ class NGINXModule extends WorkerModuleBase {
      */
     _createConfig(message) {
         const sourcePath = path.join(message.data.sourceDir, message.data.name);
-        const linkPath = path.join(this._options.linkPath, message.data.name);
+        const linkPath = path.join(message.data.sourceDir, '..', 'links', message.data.name);
 
         const seq = [
             {func: trans.writeFile, args: [sourcePath, message.data.content]},
@@ -167,7 +167,7 @@ class NGINXModule extends WorkerModuleBase {
      */
     _removeConfig(message) {
         const sourcePath = path.join(message.data.sourceDir, message.data.name);
-        const linkPath = path.join(this._options.linkPath, message.data.name);
+        const linkPath = path.join(message.data.sourceDir, '..', 'links', message.data.name);
 
         const seq = [
             {func: trans.removeLink, args: [linkPath]},
@@ -176,7 +176,7 @@ class NGINXModule extends WorkerModuleBase {
             {func: trans.exec, args: [`nginx -s reload`]}
         ];
 
-        if (message.data.kind == 0) {
+        if (message.data.kind == 0 || message.data.isPaused) {
             seq.splice(0, 1);
             seq.splice(0, 1);
         }
@@ -187,7 +187,7 @@ class NGINXModule extends WorkerModuleBase {
             {func: trans.exec, args: [`nginx -s reload`]}
         ];
 
-        if (message.data.kind == 0) {
+        if (message.data.kind == 0 || message.data.isPaused) {
             rSeq.splice(0, 1);
         }
 
@@ -203,8 +203,8 @@ class NGINXModule extends WorkerModuleBase {
         const sourcePath = path.join(message.data.sourceDir, message.data.name);
         const sourcePathOld = path.join(message.data.sourceDir, message.data.oldName);
 
-        const linkPath = path.join(this._options.linkPath, message.data.name);
-        const linkPathOld = path.join(this._options.linkPath, message.data.oldName);
+        const linkPath = path.join(message.data.sourceDir, '..', 'links', message.data.name);
+        const linkPathOld = path.join(message.data.sourceDir, '..', 'links', message.data.oldName);
 
         let seq = [
             {func: trans.writeFile, args: [sourcePath, message.data.content]},
@@ -254,7 +254,7 @@ class NGINXModule extends WorkerModuleBase {
      */
     _changeStatusConfig(message) {
         const sourcePath = path.join(message.data.sourceDir, message.data.name);
-        const linkPath = path.join(this._options.linkPath, message.data.name);
+        const linkPath = path.join(message.data.sourceDir, '..', 'links', message.data.name);
         
         const seq = [
             {func: trans.createLink, args: [sourcePath, linkPath]},
