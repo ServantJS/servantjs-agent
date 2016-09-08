@@ -62,7 +62,8 @@
     {
       "name": "nginx",
       "enabled": true,
-      "linkPath": "./tmp/nginx/links",
+      "nginxTestCmd": "nginx -t",
+      "nginxReloadCmd": "nginx -s reload",
       "depends": {
         "middlewares": [],
         "modules": []
