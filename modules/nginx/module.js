@@ -85,7 +85,7 @@ class NGINXModule extends WorkerModuleBase {
         }
     }
 
-    _commonEventHandler(message, event, seq, rollbackSeq) {
+    /*_commonEventHandler(message, event, seq, rollbackSeq) {
         async.waterfall([
             (cb) => {
                 trans.funcLoop(seq, (err, report) => {
@@ -122,7 +122,7 @@ class NGINXModule extends WorkerModuleBase {
                 {taskKey: message.data.taskKey, report: report})
             );
         });
-    }
+    }*/
 
     /**
      * 
@@ -153,7 +153,7 @@ class NGINXModule extends WorkerModuleBase {
             rSeq.splice(1, 1);
         }
 
-        this._commonEventHandler(message, NGINXModule.CreateEvent, seq, rSeq);
+        this.commonEventHandler(message, NGINXModule.CreateEvent, seq, rSeq);
     }
 
     /**
@@ -186,7 +186,7 @@ class NGINXModule extends WorkerModuleBase {
             rSeq.splice(0, 1);
         }
 
-        this._commonEventHandler(message, NGINXModule.RemoveEvent, seq, rSeq);
+        this.commonEventHandler(message, NGINXModule.RemoveEvent, seq, rSeq);
     }
     
     /**
@@ -239,7 +239,7 @@ class NGINXModule extends WorkerModuleBase {
             }
         }
 
-        this._commonEventHandler(message, NGINXModule.UpdateEvent, seq, rSeq);
+        this.commonEventHandler(message, NGINXModule.UpdateEvent, seq, rSeq);
     }
 
     /**
@@ -269,7 +269,7 @@ class NGINXModule extends WorkerModuleBase {
             rSeq[0] = {func: trans.createLink, args: [sourcePath, linkPath]};
         }
 
-        this._commonEventHandler(message, NGINXModule.ChangeStatusEvent, seq, rSeq);
+        this.commonEventHandler(message, NGINXModule.ChangeStatusEvent, seq, rSeq);
     }
     
 }
