@@ -13,8 +13,6 @@ class MiddlewareBase {
 exports.MESSAGE_RECEIVED_STAGE = 'message-received';
 exports.MODULE_STAGE = 'message-handled';
 exports.MESSAGE_SEND_STAGE = 'message-send';
-exports.TASK_RECEIVED_STAGE = 'task-received';
-exports.TASK_HANDLED_STAGE = 'task-received';
 
 exports.MiddlewareBase = MiddlewareBase;
 exports.logger = require('../lib/logger');
