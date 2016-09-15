@@ -3,8 +3,8 @@
 const NGINXModule = require('./module').NGINXModule;
 const logger = require('../core').logger;
 
-module.exports = (worker, options) => {
-    let module = new NGINXModule(worker, options);
+module.exports = (agent, options) => {
+    let module = new NGINXModule(agent, options);
 
     logger.info(`Init "${module.name.toUpperCase()}" module. Version - ${module.version}`);
 

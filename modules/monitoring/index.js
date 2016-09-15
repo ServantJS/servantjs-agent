@@ -3,8 +3,8 @@
 const MonitoringModule = require('./module').MonitoringModule;
 const logger = require('../core').logger;
 
-module.exports = (worker, options) => {
-    let module = new MonitoringModule(worker, options);
+module.exports = (agent, options) => {
+    let module = new MonitoringModule(agent, options);
 
     logger.info(`Init "${module.name.toUpperCase()}" module. Version - ${module.version}`);
 
