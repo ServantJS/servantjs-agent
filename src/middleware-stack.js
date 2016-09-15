@@ -8,10 +8,6 @@ const coreMW = require('../middlewares/core');
 const ModuleBase = require('../modules/core').ModuleBase;
 const MiddlewareBase = require('../middlewares/core').MiddlewareBase;
 
-const defer = typeof setImmediate === 'function'
-    ? setImmediate
-    : function(fn){ process.nextTick(fn.bind.apply(fn, arguments)) };
-
 const MODULE_STAGE = 'message-handled';
 
 const stages = [
@@ -109,7 +105,7 @@ class MiddlewareStack extends EventEmitter {
                 const layer = stack[index++];
 
                 if (!layer) {
-                    return defer(callback, err);
+                    return setImmediate(callback, err);
                 }
 
                 if (layer.route !== 'dummy' && searchRoute.toLowerCase() !== layer.route) {
@@ -127,7 +123,6 @@ class MiddlewareStack extends EventEmitter {
 
             nextStage();
         } else {
-            args.push(this);
             async.whilst(
                 () => {
                     return index < stack.length;

@@ -18,10 +18,9 @@ class SecurityMiddleware extends MiddlewareBase {
     /**
      *
      * @param {Object} message
-     * @param {ServantAgent} agent
      * @param {Function} next
      */
-    handle(message, agent, next) {
+    handle(message, next) {
         message.data.token = this._moduleInstance.token;
         next();
     }
