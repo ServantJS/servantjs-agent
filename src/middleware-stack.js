@@ -8,9 +8,15 @@ const coreMW = require('../middlewares/core');
 const ModuleBase = require('../modules/core').ModuleBase;
 const MiddlewareBase = require('../middlewares/core').MiddlewareBase;
 
+const defer = typeof setImmediate === 'function'
+    ? setImmediate
+    : function(fn){ process.nextTick(fn.bind.apply(fn, arguments)) };
+
+const MODULE_STAGE = 'message-handled';
+
 const stages = [
     coreMW.MESSAGE_RECEIVED_STAGE,
-    coreMW.MODULE_STAGE,
+    MODULE_STAGE,
     coreMW.MESSAGE_SEND_STAGE
 ];
 
@@ -21,10 +27,17 @@ class MiddlewareStack extends EventEmitter {
         this._stacks = {};
 
         this._stacks[coreMW.MESSAGE_RECEIVED_STAGE] = [];
-        this._stacks[coreMW.MODULE_STAGE] = [];
+        this._stacks[MODULE_STAGE] = [];
         this._stacks[coreMW.MESSAGE_SEND_STAGE] = [];
 
         this._modules = {};
+    }
+
+    /**
+     * @return {string}
+     */
+    get moduleStage() {
+        return MODULE_STAGE;
     }
 
     loadMiddlewares() {
@@ -44,7 +57,7 @@ class MiddlewareStack extends EventEmitter {
 
         logger.debug(`Registered new module. Name: "${instance.name}", version: "${instance.version}"`);
 
-        this.use(instance.name, instance.handle.bind(instance), coreMW.MODULE_STAGE);
+        this.use(instance.name, instance.handle.bind(instance), MODULE_STAGE);
     }
 
     loadMiddleware(instance) {
@@ -86,37 +99,55 @@ class MiddlewareStack extends EventEmitter {
      */
     handleStack(stack, searchRoute, args, callback) {
         let index = 0;
-        let layer = null;
 
-        async.whilst(
-            () => {
-                return index < stack.length;
-            },
-            (next) => {
-                try {
-                    layer = stack[index];
-                    
-                    if (searchRoute && layer.route !== 'dummy' && searchRoute.toLowerCase() !== layer.route) {
-                        index++;
-                        return next();
-                    }
+        if (!stack.length) {
+            return callback();
+        }
 
-                    const cb = (err) => {
-                        index++;
-                        next(err);
-                    };
+        args.push(this);
 
-                    args.push(cb);
+        if (searchRoute) {
+            const nextStage = (err) => {
+                const layer = stack[index++];
 
-                    layer.handle.apply(layer.handle, args);
-                } catch (e) {
-                    next(e);
+                if (!layer) {
+                    return defer(callback, err);
                 }
-            },
-            (err) => {
-                callback(err);
-            }
-        );
+
+                if (layer.route !== 'dummy' && searchRoute.toLowerCase() !== layer.route) {
+                    return nextStage(err);
+                }
+
+                try {
+                    layer.handle.apply(layer.handle, args);
+                    
+                    callback(err);
+                } catch (e) {
+                    nextStage(e);
+                }
+            };
+
+            nextStage();
+        } else {
+            async.whilst(
+                () => {
+                    return index < stack.length;
+                },
+                (next) => {
+                    try {
+                        const layer = stack[index++];
+
+                        args.push(next);
+                        layer.handle.apply(layer.handle, args);
+                    } catch (e) {
+                        next(e);
+                    }
+                },
+                (err) => {
+                    callback(err);
+                }
+            );
+        }
     }
 }
 

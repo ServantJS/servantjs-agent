@@ -25,7 +25,7 @@ const states = exports.states = {
     error: 3
 };
 
-class ServantWorker extends MiddlewareStack {
+class ServantAgent extends MiddlewareStack {
     constructor(options) {
         options = options || {};
 
@@ -115,7 +115,7 @@ class ServantWorker extends MiddlewareStack {
                     });
                 },
                 (callback) => {
-                    this.handleStack(this._stacks[coreMW.MODULE_STAGE], message.module, [message], (err) => {
+                    this.handleStack(this._stacks[this.moduleStage], message.module, [message], (err) => {
                         callback(err);
                     });
                 }
@@ -133,7 +133,7 @@ class ServantWorker extends MiddlewareStack {
 
     loadMiddlewares() {
         this.middlewaresOptions.forEach((item) => {
-            const temp = require(path.join(path.dirname(module.parent.filename), item))(this);
+            const temp = require(path.join(path.dirname(module.parent.filename), 'middlewares', item))(this);
             this.loadMiddleware(temp);
         });
     }
@@ -170,35 +170,14 @@ class ServantWorker extends MiddlewareStack {
 
     sendMessage(message) {
         if (message instanceof ServantMessage) {
-
-            const stack = this._stacks[coreMW.MESSAGE_SEND_STAGE];
-            let index = 0;
-
-            async.whilst(
-                () => {
-                    return index < stack.length;
-                },
-                (next) => {
-                    try {
-                        stack[index].handle(message, (err) => {
-                            index++;
-                            next(err);
-                        });
-                    } catch (e) {
-                        next(e);
-                    }
-                },
-                (err) => {
-                    if (err) {
-                        logger.error(err.message);
-                        logger.verbose(err.stack);
-                    } else {
-                        this._ws.send(message.toJSON());
-                    }
+            this.handleStack(this._stacks[coreMW.MESSAGE_SEND_STAGE], null, [message], (err) => {
+                if (err) {
+                    logger.error(err.message);
+                    logger.verbose(err.stack);
+                } else {
+                    this._ws.send(message.toJSON());
                 }
-            );
-
-            //this._ws.send(message.toJSON());
+            });
         } else {
             throw new Error('"message" is not instance of "ServantMessage"');
         }
@@ -250,4 +229,4 @@ class ServantWorker extends MiddlewareStack {
     }
 }
 
-exports.ServantWorker = ServantWorker;
+exports.ServantAgent = ServantAgent;

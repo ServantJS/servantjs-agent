@@ -5,7 +5,7 @@ const os = require('os');
 const async = require('async');
 const path = require('path');
 
-const WorkerModuleBase = require('../core').WorkerModuleBase;
+const AgentModuleBase = require('../core').AgentModuleBase;
 const ServantMessage = require('../message').ServantMessage;
 
 const logger = require('../core').logger;
@@ -14,14 +14,14 @@ const trans = require('../../lib/transaction');
 const MODULE_NAME = 'nginx';
 const MODULE_VERSION = '1.0';
 
-class NGINXModule extends WorkerModuleBase {
+class NGINXModule extends AgentModuleBase {
     /**
      *
-     * @param {ServantWorker} worker
+     * @param {ServantAgent} agent
      * @param {Object} options
      */
-    constructor(worker, options) {
-        super(worker);
+    constructor(agent, options) {
+        super(agent);
 
         this._options = options;
     }
@@ -118,7 +118,7 @@ class NGINXModule extends WorkerModuleBase {
                 });
             }
         ], (errorText, report) => {
-            this.worker.sendMessage(this.createMessage(event, errorText,
+            this.agent.sendMessage(this.createMessage(event, errorText,
                 {taskKey: message.data.taskKey, report: report})
             );
         });

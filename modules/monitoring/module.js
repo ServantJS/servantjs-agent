@@ -4,7 +4,7 @@ const fs = require('fs');
 const os = require('os');
 const async = require('async');
 
-const WorkerModuleBase = require('../core').WorkerModuleBase;
+const AgentModuleBase = require('../core').AgentModuleBase;
 const ServantMessage = require('../message').ServantMessage;
 
 const logger = require('../core').logger;
@@ -14,14 +14,14 @@ const metrics = require('./metrics');
 const MODULE_NAME = 'monitoring';
 const MODULE_VERSION = '1.0';
 
-class MonitoringModule extends WorkerModuleBase {
+class MonitoringModule extends AgentModuleBase {
     /**
      *
-     * @param {ServantWorker} worker
+     * @param {ServantAgent} agent
      * @param {Object} options
      */
-    constructor(worker, options) {
-        super(worker);
+    constructor(agent, options) {
+        super(agent);
 
         this._options = options;
         this._metricRules = {};
@@ -109,7 +109,7 @@ class MonitoringModule extends WorkerModuleBase {
                 next(new Error('Incorrect metric handler type'));
             }
         }, (err) => {
-            this.worker.sendMessage(this.createMessage(MonitoringModule.CollectEvent, null, data));
+            this.agent.sendMessage(this.createMessage(MonitoringModule.CollectEvent, null, data));
         });
     }
 }

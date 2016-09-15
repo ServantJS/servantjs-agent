@@ -5,7 +5,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const WorkerModuleBase = require('../core').WorkerModuleBase;
+const AgentModuleBase = require('../core').AgentModuleBase;
 const ServantMessage = require('../message').ServantMessage;
 
 const trans = require('../../lib/transaction');
@@ -23,14 +23,14 @@ const EVENT_LIST = [
     'Remove'
 ];
 
-class HAProxyModule extends WorkerModuleBase {
+class HAProxyModule extends AgentModuleBase {
     /**
      *
-     * @param {ServantWorker} worker
+     * @param {ServantAgent} agent
      * @param {Object} options
      */
-    constructor(worker, options) {
-        super(worker);
+    constructor(agent, options) {
+        super(agent);
 
         this.configPath = options.configPath;
         this._options = options;
@@ -163,7 +163,7 @@ class HAProxyModule extends WorkerModuleBase {
                 report = ['Read file - Error'];
             }
 
-            this.worker.sendMessage(this.createMessage(event, errorText,
+            this.agent.sendMessage(this.createMessage(event, errorText,
                 {taskKey: message.data.taskKey, report: report})
             );
         });

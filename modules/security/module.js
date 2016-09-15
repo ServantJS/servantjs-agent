@@ -3,7 +3,7 @@
 const fs = require('fs');
 const os = require('os');
 
-const WorkerModuleBase = require('../core').WorkerModuleBase;
+const AgentModuleBase = require('../core').AgentModuleBase;
 const ServantMessage = require('../message').ServantMessage;
 
 const logger = require('../core').logger;
@@ -11,14 +11,14 @@ const logger = require('../core').logger;
 const MODULE_NAME = 'security';
 const MODULE_VERSION = '1.0';
 
-class SecurityModule extends WorkerModuleBase {
+class SecurityModule extends AgentModuleBase {
     /**
      *
-     * @param {ServantWorker} worker
+     * @param {ServantAgent} agent
      * @param {Object} options
      */
-    constructor(worker, options) {
-        super(worker);
+    constructor(agent, options) {
+        super(agent);
 
         if (!(options.keyFilePath || options.accessKey)) {
             throw new Error('Missing access key options.');
@@ -93,8 +93,8 @@ class SecurityModule extends WorkerModuleBase {
      * @private
      */
     _onSendKey(message) {
-        let data = {key: this._secureKey, hostname: os.hostname(), modules: this.worker.modules};
-        this.worker.sendMessage(this.createMessage(message.event, null, data));
+        let data = {key: this._secureKey, hostname: os.hostname(), modules: this.agent.modules};
+        this.agent.sendMessage(this.createMessage(message.event, null, data));
     }
 }
 

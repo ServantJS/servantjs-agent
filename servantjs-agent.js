@@ -1,6 +1,9 @@
-const conf = require('./lib/config').use('global');
-const Worker = require('./src/client').ServantWorker;
+'use strict';
 
-const worker = new Worker(conf.get());
-worker.init();
-worker.run();
+const conf = require('./lib/config').use('global');
+const Agent = require('./src/client').ServantAgent;
+
+const agent = new Agent(conf.get());
+
+agent.init();
+agent.run();

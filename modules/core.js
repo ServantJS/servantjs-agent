@@ -8,7 +8,7 @@ const logger = exports.logger = require('../lib/logger');
 const ServantMessage = require('./message').ServantMessage;
 
 class ModuleBase extends EventEmitter {
-    constructor(worker) {
+    constructor() {
         super();
     }
 
@@ -35,15 +35,15 @@ class ModuleBase extends EventEmitter {
     }
 }
 
-class WorkerModuleBase extends ModuleBase {
-    constructor(worker) {
+class AgentModuleBase extends ModuleBase {
+    constructor(agent) {
         super();
 
-        this._worker = worker;
+        this._agent = agent;
     }
 
-    get worker() {
-        return this._worker;
+    get agent() {
+        return this._agent;
     }
 
     commonEventHandler(message, event, seq, rollbackSeq) {
@@ -79,7 +79,7 @@ class WorkerModuleBase extends ModuleBase {
                 });
             }
         ], (errorText, report) => {
-            this.worker.sendMessage(this.createMessage(event, errorText,
+            this.agent.sendMessage(this.createMessage(event, errorText,
                 {taskKey: message.data.taskKey, report: report})
             );
         });
@@ -87,4 +87,4 @@ class WorkerModuleBase extends ModuleBase {
 }
 
 exports.ModuleBase = ModuleBase;
-exports.WorkerModuleBase = WorkerModuleBase;
+exports.AgentModuleBase = AgentModuleBase;
