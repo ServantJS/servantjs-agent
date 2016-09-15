@@ -1,24 +1,22 @@
 'use strict';
 
-const fs = require('fs');
-const os = require('os');
-
-const WorkerModuleBase = require('../core').WorkerModuleBase;
+const AgentModuleBase = require('../core').AgentModuleBase;
 const ServantMessage = require('../message').ServantMessage;
 
 const logger = require('../core').logger;
+const trans = require('../../lib/transaction');
 
 const MODULE_NAME = 'test';
 const MODULE_VERSION = '1.0';
 
-class TestModule extends WorkerModuleBase {
+class TestModule extends AgentModuleBase {
     /**
      *
-     * @param {ServantWorker} worker
+     * @param {ServantAgent} agent
      * @param {Object} options
      */
-    constructor(worker, options) {
-        super(worker);
+    constructor(agent, options) {
+        super(agent);
 
         this._options = options;
     }
@@ -36,7 +34,7 @@ class TestModule extends WorkerModuleBase {
      * @param {ServantMessage} message
      */
     handle(message) {
-        //....
+        //...
     }
 }
 
