@@ -104,8 +104,6 @@ class MiddlewareStack extends EventEmitter {
             return callback();
         }
 
-        args.push(this);
-
         if (searchRoute) {
             const nextStage = (err) => {
                 const layer = stack[index++];
@@ -129,6 +127,7 @@ class MiddlewareStack extends EventEmitter {
 
             nextStage();
         } else {
+            args.push(this);
             async.whilst(
                 () => {
                     return index < stack.length;
@@ -137,8 +136,7 @@ class MiddlewareStack extends EventEmitter {
                     try {
                         const layer = stack[index++];
 
-                        args.push(next);
-                        layer.handle.apply(layer.handle, args);
+                        layer.handle.apply(layer.handle, args.concat(next));
                     } catch (e) {
                         next(e);
                     }
