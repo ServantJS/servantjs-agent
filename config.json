@@ -20,7 +20,7 @@
     {
       "name": "haproxy",
       "enabled": true,
-      "configPath": "./tmp/haproxy.conf",
+      "configPath": "/tmp/haproxy.conf",
       "depends": {
         "middlewares": [],
         "modules": []
@@ -34,11 +34,7 @@
         "modules": []
       },
       "nodes": [
-        {
-          "host": "185.71.65.232",
-          "hostname": "demo.servantjs.local",
-          "community": "nomansky"
-        }
+
       ],
       "node_type": {
         "firewall": [
